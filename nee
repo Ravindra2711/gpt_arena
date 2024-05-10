@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import OpenAI from "openai";
+import Dropdown from './Dropdown'; 
 import '../styles/GptArena.css';
 import button from '../assets/button.svg';
 
@@ -8,12 +9,12 @@ const api_key = process.env.REACT_APP_OPENAI_API_KEY;
 const openai = new OpenAI({apiKey: api_key, dangerouslyAllowBrowser: true});
 
 const modelMapping = {
-  model1: "gpt-3.5-turbo",
-  model2: "gpt-4-1106-preview", 
-  model3: "google/flan-t5-base" 
+  gpt35Turbo: "gpt-3.5-turbo",
+  gpt4: "gpt-4-1106-preview", 
+  flanT5Base: "google/flan-t5-base" 
 };
 
-// Hugging Face API Function
+// Hugging Face API Function 
 async function queryHuggingFace(prompt) { 
   const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-base", { 
     headers: { Authorization: "Bearer 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" }, 
@@ -26,19 +27,19 @@ async function queryHuggingFace(prompt) {
 
 const GptArena = () => {
   const [input, setInput] = useState('');
-  const [outputGpt, setOutputGpt] = useState({model1: '', model2: ''})
+  const [outputGpt, setOutputGpt] = useState({ gpt35Turbo: '', gpt4: '' }); 
   const [outputHuggingFace, setOutputHuggingFace] = useState('');
+  const [selectedOption, setSelectedOption] = useState('gpt-3.5-turbo'); 
 
-   const handleInputChange = e => {
+  const handleInputChange = e => {
     setInput(e.target.value);
   }
 
-  const handleSubmitGpt = async (model) => {
-    const actualModelId = modelMapping[model];
+  const handleSubmitGpt = async (modelId) => { 
     try {
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: input }],
-        model: actualModelId,
+        model: modelId,
         stream: true,
       });
       for await (const chunk of completion) {
@@ -48,7 +49,7 @@ const GptArena = () => {
         }
         setOutputGpt(prevOutput => ({
           ...prevOutput,
-          [model] : (prevOutput[model] || '') + content
+          [modelId] : (prevOutput[modelId] || '') + content
         }));
       }
     } catch (error) {
@@ -56,10 +57,11 @@ const GptArena = () => {
     }
   }
 
-  const handleSubmitHuggingFace = async (input) => {
+  const handleSubmitHuggingFace = async () => {
     try {
-      const response = await queryHuggingFace(input); 
-      const generatedText = response.generated_text; // Assuming API response structure
+      const prompt = selectedOption; 
+      const response = await queryHuggingFace(prompt); 
+      const generatedText = response.generated_text;  
       setOutputHuggingFace(generatedText); 
     } catch (error) {
       console.error("Error fetching from Hugging Face model:", error);
@@ -68,11 +70,11 @@ const GptArena = () => {
   }
 
   const handleCombinedSubmit = () => {
-    setOutputGpt({model1: '', model2: ''});
-    setOutputHuggingFace(''); 
-    handleSubmitGpt('model1');
-    handleSubmitGpt('model2');
-    handleSubmitHuggingFace(input); 
+    setOutputGpt({ gpt35Turbo: '', gpt4: '' });
+    setOutputHuggingFace('');
+    handleSubmitGpt(modelMapping.gpt35Turbo); 
+    handleSubmitGpt(modelMapping.gpt4);
+    handleSubmitHuggingFace(); 
   }
 
   const handleKeyPress = (e) => {
@@ -86,16 +88,18 @@ const GptArena = () => {
     <div className='main-page'>
       <header>GPT Arena</header>
       <div className='gpt-container'>
+        <Dropdown onOptionSelect={setSelectedOption} /> 
+
         <div className='container'>
           <h2>GPT 3.5 Turbo</h2>
           <div className="markdown-content">
-            <ReactMarkdown>{outputGpt.model1}</ReactMarkdown>
+            <ReactMarkdown>{outputGpt.gpt35Turbo}</ReactMarkdown> 
           </div>
         </div>
         <div className='container'>
           <h2>GPT 4</h2>
           <div className="markdown-content">
-            <ReactMarkdown>{outputGpt.model2}</ReactMarkdown>
+            <ReactMarkdown>{outputGpt.gpt4}</ReactMarkdown> 
           </div>
         </div>
         <div className='container'> 
