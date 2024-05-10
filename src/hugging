@@ -1,0 +1,47 @@
+import React, { useState } from 'react';
+// ... other imports ...
+import { queryHuggingFace } from './path/to/your/huggingFaceAPI'; 
+
+// ... your existing code ...
+
+const modelMapping = {
+  model1: "gpt-3.5-turbo",
+  model2: "gpt-4-1106-preview",
+  model3: "google/flan-t5-base" // Add your Hugging Face model
+}; 
+
+const GptArena = () => {
+  // ... other states ...
+  const [outputHuggingFace, setOutputHuggingFace] = useState(''); // State for Hugging Face output
+
+  // ... existing functions ...
+
+  const handleSubmitHuggingFace = async (input) => {
+    try {
+      const response = await queryHuggingFace(input); 
+      const generatedText = response.generated_text; 
+      setOutputHuggingFace(generatedText); 
+    } catch (error) {
+      console.error("Error fetching from Hugging Face model:", error);
+      setOutputHuggingFace("An error occurred."); 
+    }
+  }
+
+  const handleCombinedSubmit = () => {
+    setOutputGpt({model1: '', model2: ''});
+    setOutputHuggingFace(''); // Reset Hugging Face output
+    handleSubmitGpt('model1');
+    handleSubmitGpt('model2');
+    handleSubmitHuggingFace(input); // Call for Hugging Face model
+  }
+
+  // ... rest of your component ...
+
+  // Inside your JSX to display Hugging Face output
+  <div className='container'>
+    <h2>Hugging Face Model</h2> 
+    <div className="markdown-content">
+      <ReactMarkdown>{outputHuggingFace}</ReactMarkdown>
+    </div>
+  </div>
+};
