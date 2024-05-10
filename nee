@@ -27,9 +27,9 @@ async function queryHuggingFace(prompt) {
 
 const GptArena = () => {
   const [input, setInput] = useState('');
-  const [outputGpt, setOutputGpt] = useState({ gpt35Turbo: '', gpt4: '' }); 
-  const [outputHuggingFace, setOutputHuggingFace] = useState('');
-  const [selectedOption, setSelectedOption] = useState('gpt-3.5-turbo'); 
+  const [gptOutput, setGptOutput] = useState(''); 
+  const [huggingFaceOutput, setHuggingFaceOutput] = useState('');
+  const [selectedOption, setSelectedOption] = useState('gpt-3.5-turbo'); // Initial selection
 
   const handleInputChange = e => {
     setInput(e.target.value);
@@ -47,13 +47,11 @@ const GptArena = () => {
         if (content === undefined) {
           break;
         }
-        setOutputGpt(prevOutput => ({
-          ...prevOutput,
-          [modelId] : (prevOutput[modelId] || '') + content
-        }));
+        setGptOutput(prevOutput => (prevOutput || '') + content); 
       }
     } catch (error) {
       console.error("Error fetching from OpenAI:", error);
+      setGptOutput("An error occurred."); 
     }
   }
 
@@ -62,19 +60,23 @@ const GptArena = () => {
       const prompt = selectedOption; 
       const response = await queryHuggingFace(prompt); 
       const generatedText = response.generated_text;  
-      setOutputHuggingFace(generatedText); 
+      setHuggingFaceOutput(generatedText); 
     } catch (error) {
       console.error("Error fetching from Hugging Face model:", error);
-      setOutputHuggingFace("An error occurred."); 
+      setHuggingFaceOutput("An error occurred."); 
     }
   }
 
   const handleCombinedSubmit = () => {
-    setOutputGpt({ gpt35Turbo: '', gpt4: '' });
-    setOutputHuggingFace('');
-    handleSubmitGpt(modelMapping.gpt35Turbo); 
-    handleSubmitGpt(modelMapping.gpt4);
-    handleSubmitHuggingFace(); 
+    setGptOutput(''); 
+    setHuggingFaceOutput('');
+    const modelId = modelMapping[selectedOption]; 
+
+    if (modelId.startsWith('gpt')) { 
+      handleSubmitGpt(modelId); 
+    } else {
+      handleSubmitHuggingFace(); 
+    }
   }
 
   const handleKeyPress = (e) => {
@@ -89,23 +91,16 @@ const GptArena = () => {
       <header>GPT Arena</header>
       <div className='gpt-container'>
         <Dropdown onOptionSelect={setSelectedOption} /> 
-
-        <div className='container'>
-          <h2>GPT 3.5 Turbo</h2>
+        <div className='container'> 
+          <h2>GPT Output</h2> 
           <div className="markdown-content">
-            <ReactMarkdown>{outputGpt.gpt35Turbo}</ReactMarkdown> 
-          </div>
-        </div>
-        <div className='container'>
-          <h2>GPT 4</h2>
-          <div className="markdown-content">
-            <ReactMarkdown>{outputGpt.gpt4}</ReactMarkdown> 
+            <ReactMarkdown>{gptOutput}</ReactMarkdown>
           </div>
         </div>
         <div className='container'> 
-          <h2>Hugging Face Model</h2> 
+          <h2>Hugging Face Output</h2> 
           <div className="markdown-content">
-            <ReactMarkdown>{outputHuggingFace}</ReactMarkdown>
+            <ReactMarkdown>{huggingFaceOutput}</ReactMarkdown>
           </div>
         </div>
       </div>
@@ -120,3 +115,4 @@ const GptArena = () => {
 }
 
 export default GptArena;
+
