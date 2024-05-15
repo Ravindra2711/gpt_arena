@@ -3,8 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import OpenAI from "openai";
 import Dropdown from './Dropdown'; 
 import '../styles/GptArena.css';
-
-import button from '../assets/button.svg';
+import micIcon from '../assets/microphone.png'; // Fix import reference
 
 const api_key = process.env.REACT_APP_OPENAI_API_KEY;
 const openai = new OpenAI({apiKey: api_key, dangerouslyAllowBrowser: true});
@@ -16,11 +15,23 @@ const modelMapping = {
 
 const GptArena = () => {
   const [input, setInput] = useState('');
-  const [outputGpt, setOutputGpt] = useState({model1: '' , model2: ''})
+  const [outputGpt, setOutputGpt] = useState({model1: '', model2: ''});
 
   const handleInputChange = e => {
     setInput(e.target.value);
   }
+
+  const handleSpeechRecognition = () => {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+    };
+
+    recognition.start();
+  };
 
   const handleSubmitGpt = async (model) => {
     const actualModelId = modelMapping[model];
@@ -32,7 +43,6 @@ const GptArena = () => {
       });
       for await (const chunk of completion) {
         let content = chunk.choices[0]?.delta?.content;
-        console.log(content);
         if (content === undefined) {
           break;
         }
@@ -75,16 +85,16 @@ const GptArena = () => {
             <ReactMarkdown>{outputGpt.model2}</ReactMarkdown>
           </div>
         </div>
-    </div>
+      </div>
       <div>
         <div className='message-chat-gpt'>
           <input type='text' value={input} onChange={handleInputChange} onKeyDown={handleKeyPress} placeholder='Message ChatGPT...' />
-          <img src={button} onClick={handleCombinedSubmit} className='send' alt='send'/>
+          <button onClick={handleSpeechRecognition}><img src={micIcon} alt="microphone" /></button>
         </div>
+        
       </div>
     </div>
   )
 }
 
 export default GptArena;
-
