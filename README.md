@@ -1,5 +1,8 @@
 # GPT arena ⚡️
 Get answers from different GPT models. 
+#Modifications
+-Developed it for multi model comparison(basically free Open source LLms)
+-Also added voice to text typing , jus using WebSpeech API
 
 In the web application you can compare models: `gpt-3.5-turbo` and `gpt-4-1106-preview`.
 
