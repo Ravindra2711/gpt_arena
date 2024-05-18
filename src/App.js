@@ -20,7 +20,7 @@ function App() {
       )}
       <footer>
       <a href='https://github.com/Ravindra2711'>
-        Made randomly by @ravi ✨
+        Upgraded by @ravi ✨
       </a>
       </footer>
     </div>
