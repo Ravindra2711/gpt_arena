@@ -1,6 +1,7 @@
 # GPT arena ⚡️
 Get answers from different GPT models. 
-#Modifications
+
+# Modifications
 -Developed it for multi model comparison(basically free Open source LLms)
 -Also added voice to text typing , jus using WebSpeech API
 
